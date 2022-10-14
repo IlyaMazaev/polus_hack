@@ -1,1 +1,1 @@
-from app.database.models.user import UserData, UserNativeAuth, UserOauth
+from app.database.models.stone import Stone

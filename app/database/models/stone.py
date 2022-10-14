@@ -6,32 +6,47 @@ from pydantic_sqlalchemy import sqlalchemy_to_pydantic
 from sqlalchemy.orm import Mapped, Session, relationship
 from sqlalchemy_serializer import SerializerMixin
 
+from pydantic import BaseModel, Field
+
 from app.database.database import SqlAlchemyBase
 
 from datetime import datetime
 
 
-class Project(SqlAlchemyBase, SerializerMixin):
+class Stone(SqlAlchemyBase, SerializerMixin):
     __tablename__ = "stones"
 
+    id: int = orm.Column(orm.Integer, primary_key=True, autoincrement=True)
+    frame_id: int = orm.Column(orm.Integer, nullable=False)
 
+    bbox: list = orm.Column(orm.ARRAY(orm.String), nullable=False)
+    stone_class: int = orm.Column(orm.Integer, nullable=False)
 
     def __repr__(self):
-        return f"Project(id:{str(self.id)}, {str(self.name)})"
+        return f"Stone(id:{str(self.id)})"
 
     @classmethod
-    def get_by_id(cls, session: Session, uid: int) -> Project | None:
-        return session.query(cls).filter_by(id=uid).first()
+    def get_by_id(cls, session: Session, stone_id: int) -> Stone | None:
+        return session.query(cls).filter_by(id=stone_id).first()
 
     @classmethod
-    def get_by_name(cls, session: Session, name: str) -> Project | None:
-        return session.query(cls).filter_by(name=name).first()
+    def get_by_frame_id(cls, session: Session, frame_id: int) -> Stone | None:
+        return session.query(cls).filter_by(frame_id=frame_id).all()
 
-    def update_data(self, update_dict: dict):
-        for col_name in self.__table__.columns.keys():
-            if col_name in update_dict:
-                setattr(self, col_name, update_dict[col_name])
-        self.time_updated = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+    @classmethod
+    def get_by_class(cls, session: Session, stone_class: int) -> list | None:
+        return session.query(cls).filter_by(stone_class=stone_class).all()
+
+    @classmethod
+    def get_by_frame_and_class(cls, session: Session, frame_id: int, stone_class: int) -> list | None:
+        return session.query(cls).filter_by(frame_id=frame_id).filter_by(stone_class=stone_class).all()
 
 
-PydanticProject = sqlalchemy_to_pydantic(Project)
+PydanticStone = sqlalchemy_to_pydantic(Stone)
+
+
+class PydanticStone(BaseModel):
+    id: int
+
+    class Config:
+        orm_mode = True
