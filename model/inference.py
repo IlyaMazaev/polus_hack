@@ -1,10 +1,12 @@
+import base64
+from io import BytesIO
+from PIL import Image
 import cv2
 import torch
 import pandas as pd
 import numpy as np
 
-print(torch.cuda.is_available())
-model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
+model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt', force_reload=True)
 
 
 def getArea(box):
@@ -25,6 +27,16 @@ def get_diagonal(x1, y1, x2, y2):
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
 
+def encode_result(result):
+    result.ims
+    result.render()
+    for img in result.ims:
+        buffered = BytesIO()
+        im_base64 = Image.fromarray(img)
+        im_base64.save(buffered, format="JPEG")
+        return base64.b64encode(buffered.getvalue()).decode('utf-8') # base64 encoded image with results
+
+
 def get_results(video_path):
     count = 0
     vidcap = cv2.VideoCapture(video_path)
@@ -33,7 +45,7 @@ def get_results(video_path):
         success, image = vidcap.read()
         if success:
             result = model(image, size=640)
-            yield detect(result, count)
+            yield {"data": detect(result, count), "photo": encode_result(result)}
             count += 1
 
 
