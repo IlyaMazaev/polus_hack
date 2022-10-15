@@ -1,6 +1,7 @@
 import os.path
 from collections import OrderedDict
 
+import matplotlib
 import matplotlib.pyplot as plt
 from inference import get_results, frame_id_start, oversizes, num_of_oversizes
 import streamlit as st
@@ -63,8 +64,10 @@ for i in get_results(video_path):
     fig, ax = plt.subplots()
     ax.plot(i['data']['oversize_plot_df'])
     plot.pyplot(fig)
+    matplotlib.pyplot.close()
 
     fig1, ax1 = plt.subplots()
     ax1.plot([int(i) for i in oversizes.keys()], oversizes.values())
     over_plot.pyplot(fig1)
+    matplotlib.pyplot.close()
 
