@@ -3,8 +3,10 @@ from io import BytesIO
 from PIL import Image
 import cv2
 import torch
+import os
 
-model = torch.hub.load('ultralytics/yolov5', 'custom', path='/polus_hack_back/model/best.pt', force_reload=True, skip_validation=True, trust_repo=True)
+model = torch.hub.load('ultralytics/yolov5', 'custom', path=os.path.join(os.getcwd(), 'model', 'best.pt'),
+                       force_reload=True, skip_validation=True, trust_repo=True)
 
 
 def getArea(box):
@@ -32,7 +34,7 @@ def encode_result(result):
         buffered = BytesIO()
         im_base64 = Image.fromarray(img)
         im_base64.save(buffered, format="JPEG")
-        return base64.b64encode(buffered.getvalue()).decode('utf-8') # base64 encoded image with results
+        return base64.b64encode(buffered.getvalue()).decode('utf-8')  # base64 encoded image with results
 
 
 def get_results(video_path):
@@ -43,6 +45,8 @@ def get_results(video_path):
         success, image = vidcap.read()
         if success:
             result = model(image, size=640)
+            # yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' +
+            #        bytearray(encode_result(result)) + b'\r\n')
             yield {"data": detect(result, count), "photo": encode_result(result)}
             count += 1
 

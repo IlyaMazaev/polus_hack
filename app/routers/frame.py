@@ -1,9 +1,11 @@
+import os.path
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.database.models.frame import Frame, PydanticFrame
 from app.dependencies import auth, database
 from model.inference import get_results
-
+from fastapi.responses import StreamingResponse
 from pydantic import ValidationError
 
 router = APIRouter()
@@ -19,8 +21,9 @@ async def get_all_frames(session=Depends(database.session)) -> list:
 async def get_singe_frame_data(frame_id: int, session=Depends(database.session)) -> PydanticFrame:
     return Frame.get_by_frame_id(session, frame_id)
 
+
 @router.get("/video/")
 async def get_video_stream(session=Depends(database.session)):
-    for i in get_results('video.mp4'):
-        print(i)
-
+    for i in get_results(os.path.join(os.getcwd(), 'model', 'video.mp4')):
+        print(i['data'])
+        return str(i['data'])
