@@ -9,6 +9,9 @@ from collections import Counter
 
 model = torch.hub.load('ultralytics/yolov5', 'custom', path=os.path.join(os.getcwd(), 'best.pt'),
                        force_reload=False, skip_validation=True, trust_repo=True)
+print('CUUUUUDAAAAAA', torch.cuda.is_available())
+if torch.cuda.is_available():
+    model.cuda().half()
 
 
 def getArea(box):
