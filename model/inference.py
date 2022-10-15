@@ -1,0 +1,55 @@
+import cv2
+import torch
+import pandas as pd
+import numpy as np
+
+print(torch.cuda.is_available())
+model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
+
+
+def getArea(box):
+    return (box[2] - box[0]) * (box[3] - box[1])
+
+
+def get_class(diagonal):
+    if diagonal < 61.725399958201976: return 1
+    if 61.72994897130565 < diagonal < 75.27996081295473: return 2
+    if 75.28040648136805 < diagonal < 87.44412901962029: return 3
+    if 87.45661781706401 < diagonal < 101.22358075073218: return 4
+    if 101.23022868688976 < diagonal < 118.53381374105871: return 5
+    if 118.53510028679268 < diagonal < 144.4311600728873: return 6
+    if diagonal > 144.4464208625468: return 7
+
+
+def get_diagonal(x1, y1, x2, y2):
+    return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+
+
+def get_results(video_path):
+    count = 0
+    vidcap = cv2.VideoCapture(video_path)
+    success, image = vidcap.read()
+    while success:
+        success, image = vidcap.read()
+        if success:
+            result = model(image, size=640)
+            yield detect(result, count)
+            count += 1
+
+
+def detect(result, count):
+    df = result.pandas().xyxy[0]  # dataframe
+
+    areas_list = [getArea([df['xmin'][ind], df['ymin'][ind], df['xmax'][ind], df['ymax'][ind]]) for ind in df.index]
+    df = df.assign(area=areas_list)
+    diagonals_list = [get_diagonal(df['xmin'][ind], df['ymin'][ind], df['xmax'][ind], df['ymax'][ind]) for ind in
+                      df.index]
+    df = df.assign(diagonal=diagonals_list)
+
+    classes = [get_class(df['diagonal'][ind]) for ind in
+               df.index]
+
+    df = df.assign(classes=classes)
+
+    df.drop(['confidence', 'class', 'name'], axis=1, inplace=True)
+    return [{f'frame_id': count, 'class': list(df['classes'].values)}]

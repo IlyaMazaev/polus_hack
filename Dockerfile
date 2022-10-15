@@ -11,6 +11,7 @@ COPY ./app /polus_hack_back/app
 
 COPY requirements.txt /polus_hack_back/requirements.txt
 
+RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
 RUN pip install -r requirements.txt
 
 
