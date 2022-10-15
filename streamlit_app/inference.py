@@ -7,7 +7,7 @@ import os
 import pandas as pd
 from collections import Counter
 
-if os.getcwd() != 'streamlit_app':
+if os.getcwd() != '/streamlit_app':
     video_path = os.path.join(os.getcwd(), 'streamlit_app', 'best.pt')
 else:
     video_path = os.path.join(os.getcwd(), 'best.pt')
