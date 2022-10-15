@@ -8,6 +8,7 @@ RUN mkdir /polus_hack_back
 WORKDIR /polus_hack_back
 
 COPY ./app /polus_hack_back/app
+COPY ./model /polus_hack_back/model
 
 COPY requirements.txt /polus_hack_back/requirements.txt
 

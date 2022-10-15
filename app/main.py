@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from ..model.inference import get_results
+from model.inference import get_results
 from app.database.database import global_init
 from app.routers import stone, frame
 
@@ -15,7 +15,7 @@ app.add_middleware(
 )
 
 app.include_router(stone.router, prefix="/stone", tags=["stones"])
-app.include_router(frame.router, prefix="/frame", tags=["frames"])
+app.include_router(frame.router, prefix="/frame_data", tags=["frames"])
 
 
 @app.on_event("startup")
