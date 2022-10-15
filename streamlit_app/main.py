@@ -3,6 +3,17 @@ import matplotlib.pyplot as plt
 from inference import get_results, frame_id_start
 import streamlit as st
 from datetime import datetime
+import logging
+
+logging.basicConfig(filename='logs.log', level=logging.WARNING)
+
+# from alchemy_class import Oversize
+# from sqlalchemy import create_engine
+# from sqlalchemy.orm import sessionmaker
+# engine = create_engine("sqlite:///:memory:")
+# Session = sessionmaker(bind=engine)
+# Session.configure(bind=engine)
+# session = Session()
 
 st.title('Обнаружение негабаритов')
 
@@ -27,11 +38,16 @@ for i in get_results(video_path):
     if slider_class in i['data']['class']:
         warning.warning(f'ОБНАРУЖЕН НЕГАБАРИТ КЛАССА {slider_class}!  ' + str(datetime.now().strftime("%H:%M:%S")),
                         icon="⚠️")
+        logging.warning(f'ОБНАРУЖЕН НЕГАБАРИТ КЛАССА {slider_class}!  ' + str(datetime.now().strftime("%H:%M:%S")))
+
+        # session.add(Oversize(stone_class=slider_class, datetime=str(datetime.now().strftime("%H:%M:%S"))))
+        # session.commit()
     for size in i['data']['sizes']:
         if size >= slider_size:
             warning.warning(
                 f'ОБНАРУЖЕН НЕГАБАРИТ РАЗМЕРОМ {int(size)} мм!  ' + str(datetime.now().strftime("%H:%M:%S")),
                 icon="⚠️")
+            logging.warning(f'ОБНАРУЖЕН НЕГАБАРИТ РАЗМЕРОМ {int(size)} мм!  ' + str(datetime.now().strftime("%H:%M:%S")))
     fig, ax = plt.subplots()
     ax.plot(i['data']['oversize_plot_df'])
     plot.pyplot(fig)
