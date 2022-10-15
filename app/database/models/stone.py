@@ -10,8 +10,6 @@ from pydantic import BaseModel, Field
 
 from app.database.database import SqlAlchemyBase
 
-from datetime import datetime
-
 
 class Stone(SqlAlchemyBase, SerializerMixin):
     __tablename__ = "stones"
@@ -47,6 +45,11 @@ PydanticStone = sqlalchemy_to_pydantic(Stone)
 
 class PydanticStone(BaseModel):
     id: int
+
+    frame_id: int
+    bbox: list
+
+    stone_class: int
 
     class Config:
         orm_mode = True
