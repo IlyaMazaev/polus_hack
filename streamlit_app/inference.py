@@ -4,6 +4,8 @@ from PIL import Image
 import cv2
 import torch
 import os
+import pandas as pd
+from collections import Counter
 
 model = torch.hub.load('ultralytics/yolov5', 'custom', path=os.path.join(os.getcwd(), 'best.pt'),
                        force_reload=False, skip_validation=True, trust_repo=True)
@@ -25,6 +27,24 @@ def get_class(diagonal):
 
 def get_diagonal(x1, y1, x2, y2):
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+
+
+# data for oversize plot
+each_cl = [0, 0, 0, 0, 0, 0, 0]
+dic = {'1': [0.0], '2': [0.0], '3': [0.0], '4': [0.0], '5': [0.0], '6': [0.0], '7': [0.0]}
+
+
+def plot_oversize(cols):
+    for i in range(len(cols)):
+        each_cl[i] += cols[i]
+    val_1 = [0, 0, 0, 0, 0, 0, 0]
+    for i in range(len(each_cl)):
+        val_1[i] += each_cl[i] / len(each_cl)
+    for i in range(len(val_1)):
+        k = dic[str(i + 1)]
+        k.append(val_1[i])
+        dic[str(i + 1)] = k
+    return pd.DataFrame.from_dict(dic)
 
 
 def rud_class(width, height):
@@ -76,10 +96,17 @@ def detect(result, count):
                       df.index]
     df = df.assign(diagonal=diagonals_list)
 
-    classes = [rud_class(df['xmax'][ind]-df['xmin'][ind], df['ymax'][ind]-df['ymin'][ind] )for ind in
+    classes = [rud_class(df['xmax'][ind] - df['xmin'][ind], df['ymax'][ind] - df['ymin'][ind]) for ind in
                df.index]
 
     df = df.assign(classes=classes)
 
-    df.drop(['confidence', 'class', 'name'], axis=1, inplace=True)
-    return {f'frame_id': count, 'class': list(df['classes'].values)}
+    frequencies = {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0}
+
+    stones_number_by_class = dict(Counter(classes))
+    for i in frequencies.keys():
+        if i in stones_number_by_class.keys():
+            frequencies[i] = stones_number_by_class[i]
+    return {f'frame_id': count,
+            'class': list(df['classes'].values),
+            'oversize_plot_df': 0}
