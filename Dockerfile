@@ -12,7 +12,7 @@ RUN mkdir /polus_hack_back
 
 WORKDIR /streamlit_app
 
-COPY ./streamlit_app /polus_hack_back/streamlit_app
+COPY ./streamlit_app /streamlit_app
 
 EXPOSE 8080
 CMD ["streamlit", "run", "main.py", "--server.port=8080", "--server.address=0.0.0.0"]
