@@ -3,10 +3,8 @@ from io import BytesIO
 from PIL import Image
 import cv2
 import torch
-import pandas as pd
-import numpy as np
 
-model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt', force_reload=True)
+model = torch.hub.load('ultralytics/yolov5', 'custom', path='/polus_hack_back/model/best.pt', force_reload=True, skip_validation=True, trust_repo=True)
 
 
 def getArea(box):
