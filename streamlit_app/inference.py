@@ -104,9 +104,9 @@ def detect(result, count):
     frequencies = {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0}
 
     stones_number_by_class = dict(Counter(classes))
-    for i in frequencies.keys():
-        if i in stones_number_by_class.keys():
-            frequencies[i] = stones_number_by_class[i]
-    return {f'frame_id': count,
+    for i in stones_number_by_class.keys():
+        if str(i) in frequencies.keys():
+            frequencies[str(i)] = stones_number_by_class[i]
+    return {'frame_id': count,
             'class': list(df['classes'].values),
-            'oversize_plot_df': 0}
+            'oversize_plot_df': plot_oversize(list(frequencies.values()))}
