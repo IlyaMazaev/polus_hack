@@ -37,7 +37,8 @@ def get_diagonal(x1, y1, x2, y2):
 # data for oversize plot
 each_cl = [0, 0, 0, 0, 0, 0, 0]
 dic = {'1': [0.0], '2': [0.0], '3': [0.0], '4': [0.0], '5': [0.0], '6': [0.0], '7': [0.0]}
-
+oversizes = {}
+num_of_oversizes = 0
 
 def plot_oversize(cols):
     for i in range(len(cols)):
@@ -120,5 +121,6 @@ def detect(result, count):
     return {'frame_id': count,
             'class': classes,
             'oversize_plot_df': plot_oversize(list(frequencies.values())),
+            'oversize_plot_dict': frequencies,
             'sizes': sizes
             }
