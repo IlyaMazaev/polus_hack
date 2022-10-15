@@ -7,11 +7,13 @@ import os
 import pandas as pd
 from collections import Counter
 
-model = torch.hub.load('ultralytics/yolov5', 'custom', path=os.path.join(os.getcwd(), 'best.pt'),
+if os.getcwd() != 'streamlit_app':
+    video_path = os.path.join(os.getcwd(), 'streamlit_app', 'best.pt')
+else:
+    video_path = os.path.join(os.getcwd(), 'best.pt')
+
+model = torch.hub.load('ultralytics/yolov5', 'custom', path=video_path,
                        force_reload=False, skip_validation=True, trust_repo=True)
-print('CUUUUUDAAAAAA', torch.cuda.is_available())
-if torch.cuda.is_available():
-    model.cuda().half()
 
 
 def getArea(box):
@@ -53,19 +55,19 @@ def plot_oversize(cols):
 def rud_class(width, height):
     dev = max(width, height) * 0.0017857142857143 * 1000
     if dev <= 40:
-        return 7
+        return 7, dev
     elif dev <= 70:
-        return 6
+        return 6, dev
     elif dev <= 80:
-        return 5
+        return 5, dev
     elif dev <= 100:
-        return 4
+        return 4, dev
     elif dev <= 150:
-        return 3
+        return 3, dev
     elif dev <= 250:
-        return 2
+        return 2, dev
     else:
-        return 1
+        return 1, dev
 
 
 def encode_result(result):
@@ -78,16 +80,20 @@ def encode_result(result):
         return base64.b64encode(buffered.getvalue()).decode('utf-8')  # base64 encoded image with results
 
 
+frame_id_start = 0
+
+
 def get_results(video_path):
-    count = 0
+    global frame_id_start
     vidcap = cv2.VideoCapture(video_path)
+    vidcap.set(cv2.CAP_PROP_POS_FRAMES, frame_id_start)
     success, image = vidcap.read()
     while success:
         success, image = vidcap.read()
         if success:
             result = model(image, size=640)
-            yield {"data": detect(result, count), "photo": result}
-            count += 1
+            yield {"data": detect(result, frame_id_start), "photo": result}
+            frame_id_start += 1
 
 
 def detect(result, count):
@@ -99,10 +105,11 @@ def detect(result, count):
                       df.index]
     df = df.assign(diagonal=diagonals_list)
 
-    classes = [rud_class(df['xmax'][ind] - df['xmin'][ind], df['ymax'][ind] - df['ymin'][ind]) for ind in
+    classes = [rud_class(df['xmax'][ind] - df['xmin'][ind], df['ymax'][ind] - df['ymin'][ind])[0] for ind in
                df.index]
 
-    df = df.assign(classes=classes)
+    sizes = [rud_class(df['xmax'][ind] - df['xmin'][ind], df['ymax'][ind] - df['ymin'][ind])[1] for ind in
+             df.index]
 
     frequencies = {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0}
 
@@ -111,5 +118,7 @@ def detect(result, count):
         if str(i) in frequencies.keys():
             frequencies[str(i)] = stones_number_by_class[i]
     return {'frame_id': count,
-            'class': list(df['classes'].values),
-            'oversize_plot_df': plot_oversize(list(frequencies.values()))}
+            'class': classes,
+            'oversize_plot_df': plot_oversize(list(frequencies.values())),
+            'sizes': sizes
+            }
