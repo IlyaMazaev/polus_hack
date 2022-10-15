@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+  api:
+    build: .
+    container_name: polus_hack_back_api 
+    restart: "unless-stopped"
+    environment:
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_HOST: ${DATABASE_HOST}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_EXPIRE: ${JWT_ACCESS_EXPIRE}
+      JWT_REFRESH_EXPIRE: ${JWT_REFRESH_EXPIRE}
+      FRONTEND_HOST: ${FRONTEND_HOST}
+    depends_on:
+      - database
+    ports:
+      - 8080:8080
+
+  database:
+    image: postgres:14.1-alpine
+    container_name: polus_hack_back_database
+    restart: "unless-stopped"
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      PGDATA: /data/postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - volume:/data/postgres
+
+volumes:
+  volume:

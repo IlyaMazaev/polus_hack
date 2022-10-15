@@ -1,6 +1,9 @@
 from inference import get_results
 import streamlit as st
 from datetime import datetime
+import logging
+
+logging.basicConfig(level=logging.WARNING)
 
 st.title('Обнаружение негабаритов')
 frame = st.empty()
