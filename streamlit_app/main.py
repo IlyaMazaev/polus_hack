@@ -25,7 +25,7 @@ frame = st.empty()
 
 with st.sidebar:
     slider_size = st.slider('Размер негабарита (мм)', min_value=0, max_value=1000, step=1, value=1000)
-    slider_class = st.slider('Класс негабарита', min_value=1, max_value=7, step=1)
+    slider_class = st.slider('Класс негабарита', min_value=1, max_value=7, step=1, value=7)
     warning = st.empty()
     st.text('Кол-во классов за все время:')
     plot = st.empty()
@@ -64,10 +64,8 @@ for i in get_results(video_path):
     fig, ax = plt.subplots()
     ax.plot(i['data']['oversize_plot_df'])
     plot.pyplot(fig)
-    matplotlib.pyplot.close()
 
     fig1, ax1 = plt.subplots()
     ax1.plot([int(i) for i in oversizes.keys()], oversizes.values())
     over_plot.pyplot(fig1)
-    matplotlib.pyplot.close()
 
